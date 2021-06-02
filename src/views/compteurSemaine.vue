@@ -6,136 +6,132 @@
             </div>
             <div class="columns is-centered">
                 <div class="block">
-                    <b-radio v-model="heures_jour"
+                    <b-radio v-model="heures_semaine"
                         name="name"
-                        native-value="456">
-                        Technicien ou cadre forfait jour (7h36 => 456 min)
+                        native-value="38">
+                        Technicien ou cadre forfait jour (7h36/jour => 38h mini)
                     </b-radio>                    
-                    <b-radio v-model="heures_jour"
+                    <b-radio v-model="heures_semaine"
                         name="name"
-                        native-value="420">
-                        Stagiaire (7h => 420 min)
+                        native-value="35">
+                        Stagiaire (7h/jour => 35h maxi)
                     </b-radio>
                 </div>
             </div>
-            <div class="columns is-centered">
-                <div class="column is-one-quarter">
-					<b-field label="Heure début journée">
-						<b-input v-model.lazy="heure_debut"></b-input>
+			<div class="columns is-centered">
+				<div class="column is-one-quarter mt-5">
+					<b-field label="Lundi" label-position="on-border">
+						<b-input v-model.lazy="lundi" @input="formatHour(lundi, 'lundi')"></b-input>
 					</b-field>
 
-					<b-field label="Heure début pause midi">
-						<b-input v-model.lazy="heure_debut_pause" @blur="calcul_heures_matin"></b-input>
+					<b-field label="Mardi" label-position="on-border">
+						<b-input v-model.lazy="mardi" @input="formatHour(mardi, 'mardi')"></b-input>
 					</b-field>
 
-					<b-field label="Heure fin pause midi">
-						<b-input v-model.lazy="heure_fin_pause" @blur="calcul_temps_pause"></b-input>
+
+					<b-field label="Mercredi" label-position="on-border">
+						<b-input v-model.lazy="mercredi" @input="formatHour(mercredi, 'mercredi')"></b-input>
 					</b-field>
 
-					<b-field label="Heure fin journée théorique">
-						<b-input v-model.lazy="heure_depart_theorique"></b-input>
+					<b-field label="Jeudi" label-position="on-border">
+						<b-input v-model.lazy="jeudi" @input="formatHour(jeudi, 'jeudi')"></b-input>
 					</b-field>
-                </div>
-				<div class="column">
-					<table>
-						<thead>
-							<tr>
-								<th class="has-background-primary has-text-white px-4">Présence Matin</th>
-								<th class="has-background-primary has-text-white px-4">Durée pause midi (minutes)</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>{{ tranform_calcul_heures_matin }}</td>
-								<td>{{ duree_pause_midi }}</td>
-							</tr>
-						</tbody>
 
-					</table>
+					<b-button type="is-primary" class="my-4" @click="calculTotalHeures">Calcul heures restantes</b-button>
+
+					<b-field label="Vendredi" label-position="on-border">
+						<b-input v-model.lazy="vendredi" @input="formatHour(vendredi, 'vendredi')"></b-input>
+					</b-field>
 				</div>
-            </div>
+			</div>
+
         </section>
 	</div>
 </template>
 
 <script>
-import moment from 'moment'
-
-const TIME_PER_DAY = 456 // 7h36 minutes
-
 export default {
-  name: 'HelloWorld',
+  name: 'compteurSemaine',
   data() {
     return {
-      heure_debut: null,
-      heure_debut_pause : null,
-      heure_fin_pause : null,
-      duree_travail_matin : null,
-      duree_pause_midi : null,
-      heures_restantes :  null,
-      heure_depart_theorique : null,
-      heures_jour : 456
+      lundi: null,
+      mardi : null,
+      mercredi : null,
+      jeudi : null,
+      vendredi : null,
+	  heures_semaine : 38,
+	  total_minutes : 0
     }
   },
-  methods: {
-    calcul_temps_pause() {
-      this.duree_pause_midi = moment.duration(this.heure_fin_pause_tranform.diff(this.heure_debut_pause_transform)).minutes() +  moment.duration(this.heure_fin_pause_tranform.diff(this.heure_debut_pause_transform)).hours() * 60
-
-      if(this.duree_pause_midi <= 45){
-        let complement_pause = 45 - this.duree_pause_midi
-        this.heure_fin_pause = this.heure_fin_pause_tranform.add(complement_pause, "m").format("h:m")
-      }
-
-      this.calcul_heure_fin_journee()
-    },
-    calcul_heures_matin() {
-      this.duree_travail_matin = moment.duration(this.heure_debut_pause_transform.diff(this.heure_debut_transform)).hours() * 60 + moment.duration(this.heure_debut_pause_transform.diff(this.heure_debut_transform)).minutes()
-    },
-    calcul_heure_fin_journee(){
-      let duree_travail_apres_midi = this.heures_jour - this.duree_travail_matin
-      let heure_fin_dej = this.heure_fin_pause.split(":")
-      let heure_fin_dej_finale = moment({hour : heure_fin_dej[0], minutes : heure_fin_dej[1]}).add(duree_travail_apres_midi, 'm')
-      this.heure_depart_theorique = heure_fin_dej_finale.hours() + ":" + heure_fin_dej_finale.minutes()
-    }
+  watch: {
+	  heures_semaine(newValue, oldValue) {
+		  if(this.lundi && this.mardi && this.mercredi && this.jeudi) {
+			  this.calculTotalHeures()
+		  }
+	  }
   },
   computed: {
-    heure_debut_transform() {
-      var time = this.heure_debut.split(":")
-      return moment({hour : time[0], minute : time[1]})
+	heures_semaine_minutes() {
+		return this.heures_semaine * 60
+	},
+	heures_lundi() {
+        if(this.lundi.length === 5) {
+            var time = this.lundi.split(":")
+            return (time[0] * 60) + parseInt(time[1])
+        }
+	},
+	heures_mardi() {
+        if(this.mardi.length === 5) {
+            var time = this.mardi.split(":")
+            return (time[0] * 60) + parseInt(time[1])
+        }
+	},
+	heures_mercredi() {
+        if(this.mercredi.length === 5) {
+            var time = this.mercredi.split(":")
+            return (time[0] * 60) + parseInt(time[1])
+        }
+	},
+	heures_jeudi() {
+        if(this.jeudi.length === 5) {
+            var time = this.jeudi.split(":")
+            return (time[0] * 60) + parseInt(time[1])
+        }
+	},
+
+  },
+  methods: {
+    formatHour (value, key) {
+        let inputVal = value
+        if (inputVal.length === 4) {
+            if (!isNaN(inputVal[0]) && !isNaN(inputVal[1]) && !isNaN(inputVal[2]) && !isNaN(inputVal[3])) {
+                console.log(inputVal[0] + inputVal[1] + ':' + inputVal[2] + inputVal[3])
+                const newVal = inputVal[0] + inputVal[1] + ':' + inputVal[2] + inputVal[3]
+                this[key] = newVal
+            }
+        }
     },
-    heure_debut_pause_transform(){
-      var time = this.heure_debut_pause.split(":")
-      return moment({hour : time[0], minute : time[1]})      
-    },
-    heure_fin_pause_tranform(){
-      var time = this.heure_fin_pause.split(":")
-      return moment({hour : time[0], minute : time[1]})        
-    },
-	tranform_calcul_heures_matin(){
-		return moment.duration(this.duree_travail_matin, "m").hours() + "h" + moment.duration(this.duree_travail_matin, "m").minutes()
+	calculTotalHeures(){
+		if(this.lundi && this.mardi && this.mercredi && this.jeudi) {
+			this.total_minutes = 0
+
+			this.total_minutes = this.heures_lundi + this.heures_mardi + this.heures_mercredi + this.heures_jeudi
+			console.log("total heures semaine", this.total_minutes);
+
+			let reste_minutes_a_faire = this.heures_semaine_minutes - this.total_minutes
+			console.log("total minutes restantes", reste_minutes_a_faire);
+
+			let heures_restantes = Math.floor(reste_minutes_a_faire / 60)
+			let minutes_restantes = reste_minutes_a_faire - (heures_restantes * 60)
+
+			this.vendredi = new Intl.NumberFormat('fr-FR', { minimumIntegerDigits: 2 }).format(heures_restantes) + ":" + new Intl.NumberFormat('fr-FR', { minimumIntegerDigits: 2 }).format(minutes_restantes)
+		}
 	}
-  },
-  mounted () {
-	console.log("test", moment.duration(TIME_PER_DAY, "m"));;
-  },
+  }
 }
 </script>
 
 <style lang="css">
 
-table{
-	margin-left: auto;
-	margin-right: auto;
-}
-
-table th{
-	padding: 10px;
-	border: 2px solid black;
-}
-
-table td{
-	padding: 10px;
-	border: 2px solid black;
-}
 
 </style>
