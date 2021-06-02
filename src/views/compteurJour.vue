@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="columns is-centered my-2">
-                <div class="column is-one-quarter">
+                <div class="column">
 					<b-field label="Heure début journée" label-position="on-border">
 						<b-input v-model.lazy="heure_debut" @input="formatHour(heure_debut, 'heure_debut')"></b-input>
 					</b-field>
@@ -31,6 +31,8 @@
 					<b-field label="Heure fin pause midi" label-position="on-border">
 						<b-input v-model.lazy="heure_fin_pause" @input="formatHour(heure_fin_pause, 'heure_fin_pause')" @blur="calcul_temps_pause"></b-input>
 					</b-field>
+                    
+                    <b-button type="is-success" class="mb-4" @click="calcul_heure_fin_journee">Calculer fin journée théorique</b-button>
 
 					<b-field label="Heure fin journée théorique" label-position="on-border">
 						<b-input v-model.lazy="heure_depart_theorique" disabled></b-input>
@@ -75,6 +77,13 @@ export default {
       heures_jour : 456
     }
   },
+  watch: {
+      heures_jour(newValue, oldValue) {
+          if(this.heure_debut && this.heure_debut_pause && this.heure_fin_pause && this.duree_travail_matin){
+              this.calcul_heure_fin_journee()
+          }
+      }
+  },
   methods: {
     calcul_temps_pause() {
         this.duree_pause_midi = moment.duration(this.heure_fin_pause_tranform.diff(this.heure_debut_pause_transform)).minutes() +  moment.duration(this.heure_fin_pause_tranform.diff(this.heure_debut_pause_transform)).hours() * 60
@@ -83,8 +92,6 @@ export default {
             let complement_pause = 45 - this.duree_pause_midi
             this.heure_fin_pause = this.heure_fin_pause_tranform.add(complement_pause, "m").format("h:m")
         }
-
-        this.calcul_heure_fin_journee()
     },
     calcul_heures_matin() {
         console.log("event lancé");
@@ -94,7 +101,7 @@ export default {
       let duree_travail_apres_midi = this.heures_jour - this.duree_travail_matin
       let heure_fin_dej = this.heure_fin_pause.split(":")
       let heure_fin_dej_finale = moment({hour : heure_fin_dej[0], minutes : heure_fin_dej[1]}).add(duree_travail_apres_midi, 'm')
-      this.heure_depart_theorique = heure_fin_dej_finale.hours() + ":" + heure_fin_dej_finale.minutes()
+      this.heure_depart_theorique = heure_fin_dej_finale.hours() + ":" + new Intl.NumberFormat('fr-FR', { minimumIntegerDigits: 2 }).format(heure_fin_dej_finale.minutes())
     },
     formatHour (value, key) {
         let inputVal = value
