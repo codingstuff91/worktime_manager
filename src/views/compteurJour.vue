@@ -42,14 +42,14 @@
 					<table>
 						<thead>
 							<tr>
-								<th class="has-background-primary has-text-white px-4">Présence Matin</th>
-								<th class="has-background-primary has-text-white px-4">Durée pause midi (minutes)</th>
+								<th class="has-background-primary has-text-white px-4 text-center">Présence Matin</th>
+								<th class="has-background-primary has-text-white px-4 text-center">Durée pause midi (minutes)</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
-								<td>{{ tranform_calcul_heures_matin }}</td>
-								<td>{{ duree_pause_midi }}</td>
+								<td class="has-text-centered">{{ tranform_calcul_heures_matin }}</td>
+								<td class="has-text-centered">{{ duree_pause_midi }}</td>
 							</tr>
 						</tbody>
 
