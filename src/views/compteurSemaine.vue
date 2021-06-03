@@ -4,7 +4,15 @@
             <div class="columns  is-centered">
                 <h1 class="title mb-4">Compteur présence SEMAINE</h1>
             </div>
-            <div class="columns is-centered">
+            <div class="columns is-centered is-vcentered">
+                <b-notification
+                    type="is-danger"
+                    has-icon
+                    aria-close-label="Close notification">
+                    Rassurez vous !! Cette application ne stocke aucune donnée utilisateur !!
+                </b-notification>
+            </div>
+            <div class="columns is-centered my-4">
                 <div class="block">
                     <b-radio v-model="heures_semaine"
                         name="name"
